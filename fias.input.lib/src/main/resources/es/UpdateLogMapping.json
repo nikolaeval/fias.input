@@ -1,0 +1,10 @@
+{
+  "properties": {
+    "date": {
+      "type": "keyword"
+    },
+    "state": {
+      "type": "keyword"
+    }
+  }
+}

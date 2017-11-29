@@ -1,0 +1,80 @@
+<configuration debug="false" scan="true">
+ 
+ <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator"/>
+
+ <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+   <encoder>
+     <pattern>%d{HH:mm:ss.SSS} %-5level %logger{50} - %msg%n</pattern>
+   </encoder>
+ </appender>
+
+ <appender name="STDOUTFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${user.dir}/logs/SystemOut.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <fileNamePattern>${user.dir}/logs/SystemOut.%d{yyyy-MM-dd}.%i.log.zip</fileNamePattern>
+		<maxHistory>30</maxHistory>
+		<maxFileSize>25MB</maxFileSize>
+		<totalSizeCap>10GB</totalSizeCap>
+    </rollingPolicy>    
+	<encoder>
+      <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+ <appender name="tech.nikolaev.fias" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${user.dir}/logs/fias.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <fileNamePattern>${user.dir}/logs/fias.%d{yyyy-MM-dd}.%i.fias.zip</fileNamePattern>
+		<maxHistory>30</maxHistory>
+		<maxFileSize>25MB</maxFileSize>
+		<totalSizeCap>10GB</totalSizeCap>
+    </rollingPolicy>    
+	<encoder>
+      <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+  
+ <appender name="records" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${user.dir}/logs/records.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <fileNamePattern>${user.dir}/logs/records.%d{yyyy-MM-dd}.%i.log.zip</fileNamePattern>
+		<maxHistory>30</maxHistory>
+		<maxFileSize>25MB</maxFileSize>
+		<totalSizeCap>10GB</totalSizeCap>
+    </rollingPolicy>    
+	<encoder>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS};%msg%n</pattern>
+    </encoder>
+  </appender>
+
+ <appender name="errors" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${user.dir}/logs/errors.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <fileNamePattern>${user.dir}/logs/errors.%d{yyyy-MM-dd}.%i.log.zip</fileNamePattern>
+		<maxHistory>30</maxHistory>
+		<maxFileSize>25MB</maxFileSize>
+		<totalSizeCap>10GB</totalSizeCap>
+    </rollingPolicy>    
+	<encoder>
+      <pattern>%msg%n</pattern>
+    </encoder>
+  </appender>
+
+	<logger name="fias" level="debug" additivity="false">
+		<appender-ref ref="tech.nikolaev.fias" />
+	</logger>
+	
+	<logger name="records" level="info" additivity="false">
+		<appender-ref ref="records" />
+	</logger>
+	
+	<logger name="errors" level="info" additivity="false">
+		<appender-ref ref="errors" />
+	</logger>
+
+	<root level="INFO">
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="STDOUTFILE" />
+	</root>
+
+</configuration>

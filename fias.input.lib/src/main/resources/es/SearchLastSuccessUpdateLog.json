@@ -1,0 +1,14 @@
+{
+  "from": "0",
+  "size": "1",
+  "query": {
+    "match": {
+      "state": "SUCCESS"
+    }
+  },
+  "sort": {
+    "date": {
+      "order": "desc"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "properties": {
+    "guid": {
+      "type": "keyword",
+      "index": "false"
+    },
+    "parentGuid": {
+      "type": "keyword"
+    },
+    "postalCode": {
+      "type": "keyword",
+      "index": "false"
+    },
+    "estStatus": {
+      "type": "keyword",
+      "index": "false"
+    },
+    "num": {
+      "type": "keyword",
+      "index": "false"
+    },
+    "buildNum": {
+      "type": "keyword",
+      "index": "false"
+    },
+    "structStatus": {
+      "type": "keyword",
+      "index": "false"
+    },
+    "structNum": {
+      "type": "keyword",
+      "index": "false"
+    },
+    "cadNum": {
+      "type": "keyword",
+      "index": "false"
+    },
+    "name": {
+      "type": "text",
+      "index": "false"
+    }
+  }
+}

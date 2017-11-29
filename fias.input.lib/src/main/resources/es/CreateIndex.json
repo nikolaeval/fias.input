@@ -1,0 +1,23 @@
+{
+  "settings": {
+    "analysis": {
+      "filter": {
+        "autocomplete_filter": {
+          "type": "edge_ngram",
+          "min_gram": "1",
+          "max_gram": "10"
+        }
+      },
+      "analyzer": {
+        "ru_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "russian_morphology",
+            "autocomplete_filter"
+          ]
+        }
+      }
+    }
+  }
+}

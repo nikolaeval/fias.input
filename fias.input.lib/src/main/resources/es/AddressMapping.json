@@ -1,0 +1,44 @@
+{
+  "properties": {
+    "guid": {
+      "type": "keyword",
+      "index": "false"
+    },
+    "parentGuid": {
+      "type": "keyword"
+    },
+    "code": {
+      "type": "keyword"
+    },
+    "name": {
+      "type": "text",
+      "index": "false"
+    },
+    "type": {
+      "type": "keyword",
+      "index": "false"
+    },
+    "socrName": {
+      "type": "text",
+      "index": "false"
+    },
+    "fullName": {
+      "type": "text",
+      "analyzer": "ru_analyzer"
+    },
+    "regionCode": {
+      "type": "keyword"
+    },
+    "level": {
+      "type": "integer"
+    },
+    "status": {
+      "type": "integer",
+      "index": "false"
+    },
+    "words": {
+      "type": "text",
+      "analyzer": "ru_analyzer"
+    }
+  }
+}

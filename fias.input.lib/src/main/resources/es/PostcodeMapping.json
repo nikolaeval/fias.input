@@ -1,0 +1,14 @@
+{
+  "properties": {
+    "code": {
+      "type": "keyword"
+    },
+    "regionCode": {
+      "type": "keyword"
+    },
+    "name": {
+      "type": "text",
+      "index": "false"
+    }
+  }
+}

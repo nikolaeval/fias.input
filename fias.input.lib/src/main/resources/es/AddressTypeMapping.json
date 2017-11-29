@@ -1,0 +1,13 @@
+{
+  "properties": {
+    "shortName": {
+      "type": "keyword"
+    },
+    "offName": {
+      "type": "keyword"
+    },
+    "level": {
+      "type": "integer"
+    }
+  }
+}

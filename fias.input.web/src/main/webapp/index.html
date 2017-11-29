@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Address Input</title>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+        $( function() {
+
+            var houses = null;
+            var responseFunc = null;
+
+            function addressSource(request, response) {
+                responseFunc = response;
+                console.log("request " + request.term);
+                if (!request.term.startsWith($("#addressText").val()) || $("#addressText").val().length == 0) {
+                    $("#addressText").val(null);
+                    $("#addressId").val(null);
+                    houses = null;
+                    $.ajax({
+                        url: "/fias.input/searchAddress",
+                        dataType: "json",
+                        data: {
+                            address: request.term
+                        },
+                        success: function (data) {
+                            var values = $.map(data, function (item) {
+                                return {
+                                    label: item.fullName,
+                                    value: item.guid
+                                }
+                            });
+                            response(values);
+                        }
+                    });
+                } else {
+                    if (null == houses) {
+                        searchHouses();
+                    }
+					selectedHouses = houses;
+					houseStr = $("#address").val().substring($("#addressText").val().length +1).trim();
+					console.log("houseStr " + houseStr);
+					if (houseStr.length > 0) {
+						selectedHouses = $.grep(houses, function(house, i) {
+							return house.label.substring($("#addressText").val().length +1).indexOf(houseStr) != -1;
+						});
+						
+					}
+					console.log('selectedHouses:' + selectedHouses);
+					selectedHouses = selectedHouses.slice(0, 10);
+                    response(selectedHouses);
+                }
+            }
+
+
+            function searchHouses() {
+                console.log("searchHouses " + $("#addressId").val());
+                $.ajax({
+                    url: "/fias.input/searchHouse",
+                    dataType: "json",
+                    data:{
+                        aoguid: $("#addressId").val()
+                    },
+                    success: function(data){
+                        houses = $.map(data, function(house) {
+                            return {
+                                label: $("#addressText").val() + ', ' + house.name,
+                                value: house.guid
+                            }
+                        });
+						$("#address").autocomplete("search");
+                    }
+                });
+            }
+
+
+            $( "#address" ).autocomplete({
+                source: addressSource,
+                select: function (event, ui) {
+                    event.preventDefault();
+					if (!ui.item.label.startsWith($("#addressText").val()) || $("#addressText").val().length == 0) {
+						$("#address").val(ui.item.label + ' ');
+						$("#addressText").val(ui.item.label);
+						$("#addressId").val(ui.item.value);
+						searchHouses();
+					}
+                },
+                focus: function (event, ui) {
+                    event.preventDefault();
+                    $("#address").val(ui.item.label);
+                },
+                minLength: 3
+            });
+        });
+    </script>
+</head>
+<body>
+
+<div class="ui-widget">
+    <label for="address">Адрес: </label>
+    <input id="address" style="width: 800px"/>
+    <hidden id="addressText"/>
+    <hidden id="addressId"/>
+</div>
+
+
+</body>
+</html>
