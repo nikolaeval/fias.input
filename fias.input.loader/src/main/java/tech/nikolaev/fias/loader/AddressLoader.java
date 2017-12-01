@@ -211,6 +211,13 @@ public class AddressLoader {
 
     }
 
+    public static String getParentCode(String code, int level) {
+        final int[] sizeOfCodeLevel = new int[]{2, 5, 8, 11, 15, 19, 23};
+        final String emptyCode = "000000000000000000000";
+        code = code.substring(0, sizeOfCodeLevel[level]) + emptyCode;
+        return  code.substring(level < 7 ? 11 : 15);
+    }
+
     /**
      * Загружает полную базу с файловой системы. Дата ее актуальности передается параметром для актуализации лога загрузки в БД
      * @param fiasXmlPath
