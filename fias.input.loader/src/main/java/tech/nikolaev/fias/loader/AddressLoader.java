@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import tech.nikolaev.fias.exception.ArchiveFileNotFoundException;
 import tech.nikolaev.fias.exception.DBException;
+import tech.nikolaev.fias.model.AddressObjectEntity;
+import tech.nikolaev.fias.model.AddressTypeEntity;
+import tech.nikolaev.fias.model.PostCodeEntity;
 import tech.nikolaev.fias.model.UpdateLogEntity;
 import tech.nikolaev.fias.service.dao.ESService;
 import tech.nikolaev.fias.exception.FiasException;
@@ -211,11 +214,42 @@ public class AddressLoader {
 
     }
 
-    public static String getParentCode(String code, int level) {
-        final int[] sizeOfCodeLevel = new int[]{2, 5, 8, 11, 15, 19, 23};
+
+    /**
+     * Return parent leve of address struct
+     * @param parentLevel
+     * @return
+     * @throws FiasException
+     */
+    public static int getParentLevel(int parentLevel) throws FiasException {
+        int level = parentLevel;
+        if (level > 10) level = level / 10;
+        if (level > 7) {
+            throw new FiasException("Incorrect parent level: " + parentLevel);
+        }
+        --level;
+        //ignore deprecate levels
+        switch (level) {
+            case 2:
+            case 5:
+                --level;
+                break;
+        }
+        return level;
+    }
+
+    /**
+     * Return parent fias code of level
+     * @param code
+     * @param level
+     * @return
+     */
+    public static String getParentCode(String code, int level) throws FiasException {
+        final int[] sizeOfCodeLevel = new int[]{-1, 2, -1, 5, 8, -1, 11, 15, 19, 23};
+        int parentlevel = getParentLevel(level);
         final String emptyCode = "000000000000000000000";
-        code = code.substring(0, sizeOfCodeLevel[level]) + emptyCode;
-        return  code.substring(level < 7 ? 11 : 15);
+        code = code.substring(0, sizeOfCodeLevel[getParentLevel(level)]) + emptyCode;
+        return  code.substring(0, parentlevel < 7 ? 11 : 15);
     }
 
     /**
@@ -251,10 +285,12 @@ public class AddressLoader {
                 logger.info("process address level: {}", level);
                 AddressObjectService addressObject = beanFactory.getBean(AddressObjectService.class, level);
                 addressBaseFile.processFile("AS_ADDROBJ", addressObject);
+                esService.flushDB(AddressObjectEntity.TYPE);
             }
 
             if (regionFilterService.isEnabled()) {
                 postCodeService.loadPostcodes();
+                esService.flushDB(PostCodeEntity.TYPE);
             }
 
             addressBaseFile.processFile("AS_HOUSE", houseService);
