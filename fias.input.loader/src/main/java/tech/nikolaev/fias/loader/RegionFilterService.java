@@ -52,7 +52,7 @@ public class RegionFilterService {
         if (regionFilter == null) {
             return true;
         }
-        if (postcodesFilter == null) {
+        if (postcodesFilter == null ) {
             postcodesFilter = new HashSet<>();
             for (String regionCode : regionFilter) {
                 Set<String> postcodes = esService.getRegionPostcodes(regionCode);
