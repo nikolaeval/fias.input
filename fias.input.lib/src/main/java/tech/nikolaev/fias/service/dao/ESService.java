@@ -230,12 +230,19 @@ public class ESService implements DBService {
         }
     }
 
-    public List<AddressObjectEntity> getAddressByCode(String code) throws DBException {
+    public AddressObjectEntity getAddressByCode(String code) throws DBException {
         try {
             String request = String.format(getScriptResource("/es/SearchByCode.json"), code);
             logger.debug("\n{}", request);
             Response response =  restClient.performRequest("GET", getSearchUrl(AddressObjectEntity.TYPE), Collections.<String, String>emptyMap(), new NStringEntity(request, ContentType.APPLICATION_JSON));
-            return parseResult(response, AddressObjectEntity.class);
+            List<AddressObjectEntity> result = parseResult(response, AddressObjectEntity.class);
+            if (result.size() == 0) {
+                return null;
+            }
+            if (result.size() > 1) {
+                throw new DBException("Non unique result for " + code);
+            }
+            return result.get(0);
         } catch (IOException ioe) {
             logger.error(ioe.getMessage(), ioe);
             throw new DBException(ioe);
