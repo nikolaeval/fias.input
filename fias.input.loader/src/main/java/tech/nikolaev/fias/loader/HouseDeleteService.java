@@ -32,9 +32,6 @@ public class HouseDeleteService extends DataLoader {
         if (null == r || !"House".equals(r.getLocalName())) {
             return null;
         }
-        if (regionFilterService.isEnabled() && !regionFilterService.checkPostcode(r.getAttributeValue(null, "POSTALCODE"))) {
-            return null;
-        }
         HouseEntity house = HouseEntity.createFromStream(r);
         logRecordInfo(house, Result.DELETE);
         return new AddressEntityAction(AddressEntityAction.Action.DELETE, house);
