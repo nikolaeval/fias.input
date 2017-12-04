@@ -15,10 +15,18 @@ public class AddressObjectEntity implements AddressEntity {
         AOGUID,
 		PARENTGUID,
         PLAINCODE,
-        OFFNAME,
+        FORMALNAME,
         SHORTNAME,
         AOLEVEL,
-        LIVESTATUS;
+        LIVESTATUS,
+        REGIONCODE,
+		AREACODE,
+		CITYCODE,
+        CTARCODE,
+		PLACECODE,
+        PLANCODE,
+		STREETCODE,
+        EXTRCODE;
     }
 
     private String guid;
@@ -28,17 +36,17 @@ public class AddressObjectEntity implements AddressEntity {
     private String socrName;
     private String fullName;
     private String regionCode;
-    private int level;
+    private String level;
     private int status;
     private Set<String> words;
 
-    public AddressObjectEntity(String guid, String parentGuid, String code, String name, String socrName, int level, int status) {
+    public AddressObjectEntity(String guid, String parentGuid, String code, String name, String socrName, String level, int status) {
         this.guid = guid;
         this.parentGuid = parentGuid;
         this.code = code;
         this.name = name;
         this.socrName = socrName;
-        this.regionCode = null == code ? null : code.substring(0, 2);
+        this.regionCode = code.substring(0, 2);
         this.level = level;
         this.status = status;
         this.words = new HashSet<>();
@@ -48,11 +56,37 @@ public class AddressObjectEntity implements AddressEntity {
         return new AddressObjectEntity(
             r.getAttributeValue(null, Attributes.AOGUID.name()),
             r.getAttributeValue(null, Attributes.PARENTGUID.name()),
-            r.getAttributeValue(null, Attributes.PLAINCODE.name()),
-            r.getAttributeValue(null, Attributes.OFFNAME.name()),
+            getPlainCode(r),
+            r.getAttributeValue(null, Attributes.FORMALNAME.name()),
             r.getAttributeValue(null, Attributes.SHORTNAME.name()),
-            Integer.parseInt(r.getAttributeValue(null, Attributes.AOLEVEL.name())),
+            r.getAttributeValue(null, Attributes.AOLEVEL.name()),
             Integer.parseInt(r.getAttributeValue(null, Attributes.LIVESTATUS.name())));
+    }
+
+    private static String getPlainCode(XMLStreamReader r) {
+        String plainCode = r.getAttributeValue(null, Attributes.PLAINCODE.name());
+        if (null == plainCode) {
+            int level = Integer.parseInt(r.getAttributeValue(null, Attributes.AOLEVEL.name()));
+            StringBuilder builder = new StringBuilder(27);
+            builder.append(r.getAttributeValue(null, Attributes.REGIONCODE.name()));
+            String area = r.getAttributeValue(null, Attributes.AREACODE.name());
+            builder.append(null == area ? "000" : area);
+            String city = r.getAttributeValue(null, Attributes.CITYCODE.name());
+            builder.append(null == city ? "000" : city);
+            String place = ("5".equals(level) || "65".equals(level)|| "90".equals(level)) ? r.getAttributeValue(null, Attributes.CTARCODE.name()) : r.getAttributeValue(null, Attributes.PLACECODE.name());
+            builder.append(null == place ? "000" : place);
+            if (level > 6) {
+                if (!"0000".equals(r.getAttributeValue(null, Attributes.EXTRCODE.name()))) {
+                    builder.append(r.getAttributeValue(null, Attributes.EXTRCODE.name()));
+                } else if (!"0000".equals(r.getAttributeValue(null, Attributes.STREETCODE.name()))) {
+                    builder.append(r.getAttributeValue(null, Attributes.STREETCODE.name()));
+                } else if (!"0000".equals(r.getAttributeValue(null, Attributes.PLANCODE.name()))) {
+                    builder.append(r.getAttributeValue(null, Attributes.PLANCODE.name()));
+                }
+            }
+            plainCode = builder.toString();
+        }
+        return plainCode;
     }
 
     public String getCode() {
@@ -91,7 +125,7 @@ public class AddressObjectEntity implements AddressEntity {
         return regionCode;
     }
 
-    public int getLevel() {
+    public String getLevel() {
         return level;
     }
 

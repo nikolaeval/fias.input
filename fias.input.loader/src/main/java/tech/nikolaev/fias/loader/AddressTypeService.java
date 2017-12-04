@@ -49,7 +49,7 @@ public class AddressTypeService extends DataLoader {
     protected AddressEntityAction processAttributes(XMLStreamReader r) {
         try {
             if (r.getLocalName().equals("AddressObjectType") && r.getAttributeValue(null, "SOCRNAME").length() > 0) {
-                AddressTypeEntity addressTypeEntity = new AddressTypeEntity(r.getAttributeValue(null, "SCNAME"), r.getAttributeValue(null, "SOCRNAME"), Integer.parseInt(r.getAttributeValue(null, "LEVEL")));
+                AddressTypeEntity addressTypeEntity = new AddressTypeEntity(r.getAttributeValue(null, "SCNAME"), r.getAttributeValue(null, "SOCRNAME"), r.getAttributeValue(null, "LEVEL"));
                 addressTypes.put(addressTypeEntity.getId(), addressTypeEntity);
                 logRecordInfo(addressTypeEntity, Result.INDEX);
                 return new AddressEntityAction(AddressEntityAction.Action.INDEX, addressTypeEntity);

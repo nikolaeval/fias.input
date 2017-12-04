@@ -26,7 +26,7 @@ public class AddressObjectService extends DataLoader {
 
     private static final Logger logger = LoggerFactory.getLogger(AddressObjectService.class);
 
-    private Integer level;
+    private String level;
 
     @Value("${bulk.size}")
     private Integer bulkSize;
@@ -40,8 +40,47 @@ public class AddressObjectService extends DataLoader {
     @Autowired
 	RegionFilterService regionFilterService;
 
-    public AddressObjectService(Integer level) {
+    public AddressObjectService(String level) {
         this.level = level;
+    }
+
+
+
+    /**
+     * Return parent leve of address struct
+     * @param parentLevel
+     * @return
+     * @throws FiasException
+     */
+    public int getParentLevel(int parentLevel) throws FiasException {
+        int level = parentLevel;
+        if (level > 10) level = level / 10;
+        if (level > 7) {
+            throw new FiasException("Incorrect parent level: " + parentLevel);
+        }
+        --level;
+        //ignore deprecate levels
+        switch (level) {
+            case 2:
+            case 5:
+                --level;
+                break;
+        }
+        return level;
+    }
+
+    /**
+     * Return parent fias code of level
+     * @param code
+     * @param level
+     * @return
+     */
+    public String getParentCode(String code, String level) throws FiasException {
+        final String emptyCode = "000000000000000000000";
+        final int[] sizeOfCodeLevel = new int[]{-1, 2, -1, 5, 8, -1, 11, 15, 19, 23};
+        int parentLevel = getParentLevel(Integer.parseInt(level));
+        code = code.substring(0, sizeOfCodeLevel[parentLevel]) + emptyCode;
+        return  code.substring(0, parentLevel < 7 ? 11 : 15);
     }
 
     @Override
@@ -51,12 +90,17 @@ public class AddressObjectService extends DataLoader {
             if (null == r || !"Object".equals(r.getLocalName())) {
 				return null;
 			}
+			if (!"1".equals(r.getAttributeValue(null, "ACTSTATUS"))) {
+                return null;
+            }
             addressObject = AddressObjectEntity.createFromStream(r);
-			if (!regionFilterService.checkRegion(addressObject.getRegionCode()) || level != addressObject.getLevel()/*|| Integer.parseInt(r.getAttributeValue(null, "LIVESTATUS")) == 0 || regionCode == null*/) {
+
+			if (!regionFilterService.checkRegion(addressObject.getRegionCode()) || !level.equals(addressObject.getLevel())) {
 				return null;
 			}
 
 			if (addressObject.getStatus() == 0) {
+				logRecordInfo(addressObject, Result.DELETE);
                 return new AddressEntityAction(AddressEntityAction.Action.DELETE, addressObject);
             }
 
@@ -71,7 +115,7 @@ public class AddressObjectService extends DataLoader {
                 //find parent by code
                 if (null == parent ) {
                     // impossible situation. but just in case
-                    parent = esService.getAddressByCode(addressObject.getCode());
+                    parent = esService.getAddressByCode(getParentCode(addressObject.getCode(), addressObject.getLevel()));
                 }
 				if (null != parent) {
 					addressObject.setFullName(parent.getFullName() + ", " + name);

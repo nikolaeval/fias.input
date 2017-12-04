@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import tech.nikolaev.fias.exception.ArchiveFileNotFoundException;
 import tech.nikolaev.fias.exception.DBException;
 import tech.nikolaev.fias.model.AddressObjectEntity;
-import tech.nikolaev.fias.model.AddressTypeEntity;
 import tech.nikolaev.fias.model.PostCodeEntity;
 import tech.nikolaev.fias.model.UpdateLogEntity;
 import tech.nikolaev.fias.service.dao.ESService;
@@ -35,7 +34,7 @@ public class AddressLoader {
     private static final String FIAS_LAST_VERSION_FORMAT = "dd.MM.yyyy";
 
     @Value("${max.level}")
-    private Integer maxLevel;
+    private String maxLevel;
 
     @Value("${fias_xml.url}")
     private String fiasXmlUrlMask;
@@ -214,44 +213,6 @@ public class AddressLoader {
 
     }
 
-
-    /**
-     * Return parent leve of address struct
-     * @param parentLevel
-     * @return
-     * @throws FiasException
-     */
-    public static int getParentLevel(int parentLevel) throws FiasException {
-        int level = parentLevel;
-        if (level > 10) level = level / 10;
-        if (level > 7) {
-            throw new FiasException("Incorrect parent level: " + parentLevel);
-        }
-        --level;
-        //ignore deprecate levels
-        switch (level) {
-            case 2:
-            case 5:
-                --level;
-                break;
-        }
-        return level;
-    }
-
-    /**
-     * Return parent fias code of level
-     * @param code
-     * @param level
-     * @return
-     */
-    public static String getParentCode(String code, int level) throws FiasException {
-        final int[] sizeOfCodeLevel = new int[]{-1, 2, -1, 5, 8, -1, 11, 15, 19, 23};
-        int parentlevel = getParentLevel(level);
-        final String emptyCode = "000000000000000000000";
-        code = code.substring(0, sizeOfCodeLevel[getParentLevel(level)]) + emptyCode;
-        return  code.substring(0, parentlevel < 7 ? 11 : 15);
-    }
-
     /**
      * Загружает полную базу с файловой системы. Дата ее актуальности передается параметром для актуализации лога загрузки в БД
      * @param fiasXmlPath
@@ -274,12 +235,14 @@ public class AddressLoader {
             addressBaseFile.processFile("AS_ESTSTAT", estStatusService);
             addressBaseFile.processFile("AS_STRSTAT", strStatusService);
 
-            Set<Integer> levelsSet = new HashSet<>(16);
+            Set<String> levelsSet = new HashSet<>(16);
             addressTypeService.getAddressTypes().values().forEach(addrType -> levelsSet.add(addrType.getLevel()));
-            ArrayList<Integer> levels = new ArrayList(levelsSet);
+            //Add deprecated level number '5'
+            levelsSet.add("5");
+            ArrayList<String> levels = new ArrayList(levelsSet);
             Collections.sort(levels);
-            for (Integer level : levels) {
-                if (level > maxLevel.intValue()) {
+            for (String level : levels) {
+                if (level.compareTo(maxLevel) > 0) {
                     break;
                 }
                 logger.info("process address level: {}", level);

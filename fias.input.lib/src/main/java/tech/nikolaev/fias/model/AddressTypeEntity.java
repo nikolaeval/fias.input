@@ -9,15 +9,15 @@ public class AddressTypeEntity implements AddressEntity{
 
     private String shortName;
     private String offName;
-    private int level;
+    private String level;
 
-    public AddressTypeEntity(String shortName, String offName, int level) {
+    public AddressTypeEntity(String shortName, String offName, String level) {
         this.shortName = shortName;
         this.offName = offName;
         this.level = level;
     }
 
-    public int getLevel() {
+    public String getLevel() {
         return level;
     }
 
