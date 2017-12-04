@@ -44,45 +44,6 @@ public class AddressObjectService extends DataLoader {
         this.level = level;
     }
 
-
-
-    /**
-     * Return parent leve of address struct
-     * @param parentLevel
-     * @return
-     * @throws FiasException
-     */
-    public int getParentLevel(int parentLevel) throws FiasException {
-        int level = parentLevel;
-        if (level > 10) level = level / 10;
-        if (level > 7) {
-            throw new FiasException("Incorrect parent level: " + parentLevel);
-        }
-        --level;
-        //ignore deprecate levels
-        switch (level) {
-            case 2:
-            case 5:
-                --level;
-                break;
-        }
-        return level;
-    }
-
-    /**
-     * Return parent fias code of level
-     * @param code
-     * @param level
-     * @return
-     */
-    public String getParentCode(String code, String level) throws FiasException {
-        final String emptyCode = "000000000000000000000";
-        final int[] sizeOfCodeLevel = new int[]{-1, 2, -1, 5, 8, -1, 11, 15, 19, 23};
-        int parentLevel = getParentLevel(Integer.parseInt(level));
-        code = code.substring(0, sizeOfCodeLevel[parentLevel]) + emptyCode;
-        return  code.substring(0, parentLevel < 7 ? 11 : 15);
-    }
-
     @Override
     protected AddressEntityAction processAttributes(XMLStreamReader r) throws FiasException {
         AddressObjectEntity addressObject = null;
@@ -113,10 +74,6 @@ public class AddressObjectService extends DataLoader {
 			if (null != addressObject.getParentGuid()) {
                 AddressObjectEntity parent = esService.getAddress(addressObject.getParentGuid());
                 //find parent by code
-                if (null == parent ) {
-                    // impossible situation. but just in case
-                    parent = esService.getAddressByCode(getParentCode(addressObject.getCode(), addressObject.getLevel()));
-                }
 				if (null != parent) {
 					addressObject.setFullName(parent.getFullName() + ", " + name);
 					addressObject.getWords().addAll(parent.getWords());
