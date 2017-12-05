@@ -95,8 +95,11 @@ public class PostCodeService extends DataLoader {
                     if (null == regionCode) {
                         unknownRegs.add(((String)rec[fields.get("REGION")]).trim());
                     } else {
-                        PostCodeEntity postcode = new PostCodeEntity((String) rec[fields.get("INDEX")], regionCode, ((String) rec[fields.get("OPSNAME")]).trim());
-                        objects.put(postcode.getId(), new AddressEntityAction(AddressEntityAction.Action.INDEX, postcode));
+                        if (regionFilterService.checkRegion(regionCode)) {
+                            PostCodeEntity postcode = new PostCodeEntity((String) rec[fields.get("INDEX")], regionCode, ((String) rec[fields.get("OPSNAME")]).trim());
+                            objects.put(postcode.getId(), new AddressEntityAction(AddressEntityAction.Action.INDEX, postcode));
+                            regionFilterService.addToPostcodesFilter(postcode.getCode());
+                        }
                     }
                     if (objects.size() == getBulkSize()) {
                         updateDB(objects, PostCodeEntity.TYPE);

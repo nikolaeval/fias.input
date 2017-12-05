@@ -58,13 +58,20 @@ public class RegionFilterService {
                 Set<String> postcodes = esService.getRegionPostcodes(regionCode);
                 if (postcodes.isEmpty()) {
                     logger.warn("Not found postcodes for '{}' region", regionCode);
+                } else {
+                    postcodesFilter.addAll(postcodes);
                 }
-                postcodesFilter.addAll(postcodes);
-                logger.info("postcodes filter: {}", postcodesFilter);
             }
+            logger.info("postcodes filter: {}", postcodesFilter);
         }
         return postcodesFilter.contains(postcode);
     }
 
+    public void addToPostcodesFilter(String postcode) {
+        if (null == postcodesFilter) {
+            postcodesFilter = new HashSet<>();
+        }
+        postcodesFilter.add(postcode);
+    }
 
 }
