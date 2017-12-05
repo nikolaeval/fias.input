@@ -236,7 +236,7 @@ public class ESService implements DBService {
             logger.debug("\n{}", request);
             Response response =  restClient.performRequest("GET", getSearchUrl(AddressObjectEntity.TYPE), Collections.<String, String>emptyMap(), new NStringEntity(request, ContentType.APPLICATION_JSON));
             List<AddressObjectEntity> result = parseResult(response, AddressObjectEntity.class);
-            if (result.size() == 0) {
+            if (result.isEmpty()) {
                 return null;
             }
             if (result.size() > 1) {
