@@ -335,10 +335,15 @@ public class ESService implements DBService {
 			List<UpdateLogEntity> result = parseResult(response, UpdateLogEntity.class);
 			return result.isEmpty() ? null : result.get(0);
 
+        } catch (ResponseException re) {
+            if (re.getResponse().getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+                return null;
+            }
 		} catch (IOException ioe) {
             logger.error(ioe.getMessage(), ioe);
             throw new DBException(ioe);
         }
+        return null;
     }
 
 
