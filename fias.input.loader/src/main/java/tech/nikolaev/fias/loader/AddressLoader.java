@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import tech.nikolaev.fias.exception.ArchiveFileNotFoundException;
 import tech.nikolaev.fias.exception.DBException;
-import tech.nikolaev.fias.model.AddressObjectEntity;
-import tech.nikolaev.fias.model.PostCodeEntity;
 import tech.nikolaev.fias.model.UpdateLogEntity;
 import tech.nikolaev.fias.service.dao.ESService;
 import tech.nikolaev.fias.exception.FiasException;
@@ -85,6 +83,15 @@ public class AddressLoader {
         esService.createDB();
     }
 
+    public boolean checkForUpdate() throws IOException, FiasException {
+        LocalDate currentDate = getLastFiasVersion();
+        UpdateLogEntity updateLog = updateLogService.getLastSuccessLog();
+        if (null == updateLog || UpdateLogEntity.parseDate(updateLog.getDate()).isBefore(currentDate)) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Loaded full database on current date
      * @throws IOException
@@ -121,7 +128,7 @@ public class AddressLoader {
             loadData(date);
         } else {
             LocalDate nextUpdateDate = getNextFiasVersionDate(UpdateLogEntity.parseDate(updateLog.getDate()));
-            while (null != nextUpdateDate && nextUpdateDate.isBefore(date)) {
+            while (null != nextUpdateDate && !nextUpdateDate.isAfter(date)) {
                 updateData(nextUpdateDate);
 				nextUpdateDate = getNextFiasVersionDate(nextUpdateDate);
             }
@@ -138,6 +145,7 @@ public class AddressLoader {
         Path fiasDeltaXmlPath = null;
         try {
             String fiasUpdateXmlUrl = String.format(fiasDeltaXmlUrlMask, UpdateLogEntity.formatDate(date));
+            logger.info("Download fias delta {}", fiasUpdateXmlUrl);
             fiasDeltaXmlPath = HttpUtils.downloadFileToTemp(fiasUpdateXmlUrl);
             loadData(fiasDeltaXmlPath, date);
         } finally {
@@ -188,6 +196,7 @@ public class AddressLoader {
         try {
             date = getActualFiasVersionDate(date);
             String fiasXmlUrl = String.format(fiasXmlUrlMask, UpdateLogEntity.formatDate(date));
+            logger.info("Download fias db {}", fiasXmlUrl);
             fiasXmlPath = HttpUtils.downloadFileToTemp(fiasXmlUrl);
             loadData(fiasXmlPath, date);
         } finally {
@@ -248,12 +257,10 @@ public class AddressLoader {
                 logger.info("process address level: {}", level);
                 AddressObjectService addressObject = beanFactory.getBean(AddressObjectService.class, level);
                 addressBaseFile.processFile("AS_ADDROBJ", addressObject);
-                esService.flushDB(AddressObjectEntity.TYPE);
             }
 
             if (regionFilterService.isEnabled()) {
                 postCodeService.loadPostcodes();
-                esService.flushDB(PostCodeEntity.TYPE);
             }
 
             addressBaseFile.processFile("AS_HOUSE", houseService);

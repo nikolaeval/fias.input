@@ -65,28 +65,28 @@ public class AddressObjectEntity implements AddressEntity {
 
     private static String getPlainCode(XMLStreamReader r) {
         String plainCode = r.getAttributeValue(null, Attributes.PLAINCODE.name());
-        if (null == plainCode) {
-            int level = Integer.parseInt(r.getAttributeValue(null, Attributes.AOLEVEL.name()));
-            StringBuilder builder = new StringBuilder(27);
-            builder.append(r.getAttributeValue(null, Attributes.REGIONCODE.name()));
-            String area = r.getAttributeValue(null, Attributes.AREACODE.name());
-            builder.append(null == area ? "000" : area);
-            String city = r.getAttributeValue(null, Attributes.CITYCODE.name());
-            builder.append(null == city ? "000" : city);
-            String place = ("5".equals(level) || "65".equals(level)|| "90".equals(level)) ? r.getAttributeValue(null, Attributes.CTARCODE.name()) : r.getAttributeValue(null, Attributes.PLACECODE.name());
-            builder.append(null == place ? "000" : place);
-            if (level > 6) {
-                if (!"0000".equals(r.getAttributeValue(null, Attributes.EXTRCODE.name()))) {
-                    builder.append(r.getAttributeValue(null, Attributes.EXTRCODE.name()));
-                } else if (!"0000".equals(r.getAttributeValue(null, Attributes.STREETCODE.name()))) {
-                    builder.append(r.getAttributeValue(null, Attributes.STREETCODE.name()));
-                } else if (!"0000".equals(r.getAttributeValue(null, Attributes.PLANCODE.name()))) {
-                    builder.append(r.getAttributeValue(null, Attributes.PLANCODE.name()));
-                }
-            }
-            plainCode = builder.toString();
-        }
-        return plainCode;
+		if (null != plainCode) {
+			return plainCode;
+		}
+		String level = r.getAttributeValue(null, Attributes.AOLEVEL.name());
+		StringBuilder builder = new StringBuilder(27);
+		builder.append(r.getAttributeValue(null, Attributes.REGIONCODE.name()));
+		String area = r.getAttributeValue(null, Attributes.AREACODE.name());
+		builder.append(null == area ? "000" : area);
+		String city = r.getAttributeValue(null, Attributes.CITYCODE.name());
+		builder.append(null == city ? "000" : city);
+		String place = r.getAttributeValue(null, Attributes.PLACECODE.name());
+		builder.append(null == place ? "000" : place);
+		if (level.compareTo("6") > 0) {
+			if (!"0000".equals(r.getAttributeValue(null, Attributes.EXTRCODE.name()))) {
+				builder.append(r.getAttributeValue(null, Attributes.EXTRCODE.name()));
+			} else if (!"0000".equals(r.getAttributeValue(null, Attributes.STREETCODE.name()))) {
+				builder.append(r.getAttributeValue(null, Attributes.STREETCODE.name()));
+			} else if (!"0000".equals(r.getAttributeValue(null, Attributes.PLANCODE.name()))) {
+				builder.append(r.getAttributeValue(null, Attributes.PLANCODE.name()));
+			}
+		}
+        return builder.toString();
     }
 
     public String getCode() {

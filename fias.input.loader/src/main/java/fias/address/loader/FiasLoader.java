@@ -34,6 +34,11 @@ public class FiasLoader {
 
         try {
             AddressLoader addressLoader = ctx.getBean(AddressLoader.class);
+            if (!addressLoader.checkForUpdate()) {
+                logger.info("The actualy version is already loaded");
+                return;
+            }
+
             if (null != clean && Boolean.parseBoolean(clean)) {
                 addressLoader.clearDB();
             }
@@ -48,9 +53,10 @@ public class FiasLoader {
                 addressLoader.update();
             }
         } catch (Exception e) {
-            logger.error("Application error: {}", e.getMessage(), e);
+            logger.error("Error loading fias db: {}", e.getMessage(), e);
+        } finally {
+            ctx.close();
         }
-        ctx.close();
     }
 
 }

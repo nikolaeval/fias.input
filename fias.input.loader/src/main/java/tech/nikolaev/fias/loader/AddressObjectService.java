@@ -73,7 +73,6 @@ public class AddressObjectService extends DataLoader {
 			String name = addressTypeService.getAddressTypes().get(addressObject.getSocrName()).getName() + " " + addressObject.getName();
 			if (null != addressObject.getParentGuid()) {
                 AddressObjectEntity parent = esService.getAddress(addressObject.getParentGuid());
-                //find parent by code
 				if (null != parent) {
 					addressObject.setFullName(parent.getFullName() + ", " + name);
 					addressObject.getWords().addAll(parent.getWords());
