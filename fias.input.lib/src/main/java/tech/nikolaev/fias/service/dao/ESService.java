@@ -284,7 +284,7 @@ public class ESService implements DBService {
     public List<AddressObjectEntity> searchAddress(List<String> keywords) throws DBException {
         try {
             StringBuilder match = new StringBuilder();
-            keywords.forEach(k -> match.append(",{\"fuzzy\":{\"words\":{\"value\":\"").append(k).append("\", \"fuzziness\":1, \"prefix_length\":2}}}"));
+            keywords.forEach(k -> match.append(",{\"fuzzy\":{\"words\":\"").append(k).append("\"}}"));
             String request = String.format(getScriptResource("/es/SearchAddress.json"), match.substring(1));
             logger.trace("\n{}", request);
             Response response =  restClient.performRequest("GET", getSearchUrl(AddressObjectEntity.TYPE), Collections.<String, String>emptyMap(), new NStringEntity(request, ContentType.APPLICATION_JSON));
