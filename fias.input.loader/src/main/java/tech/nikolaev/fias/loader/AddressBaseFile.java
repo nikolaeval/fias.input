@@ -55,9 +55,10 @@ public class AddressBaseFile {
         try (Archive archive = new Archive(filepath.toFile());
             PipedInputStream is = new PipedInputStream();
             PipedOutputStream os = new PipedOutputStream(is)) {
+            FileHeader fileHeader = getArchiveHeader(archive, filename);
             logger.info("Processing file: '{}'", filename);
             Future future = executor.submit(() -> loader.loadData(is));
-            archive.extractFile(getArchiveHeader(archive, filename), os);
+            archive.extractFile(fileHeader, os);
             FileUtils.close(os);
             future.get();
         } catch (ExecutionException | InterruptedException | IOException | RarException e) {
