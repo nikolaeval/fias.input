@@ -86,10 +86,7 @@ public class AddressLoader {
     public boolean checkForUpdate() throws IOException, FiasException {
         LocalDate currentDate = getLastFiasVersion();
         UpdateLogEntity updateLog = updateLogService.getLastSuccessLog();
-        if (null == updateLog || UpdateLogEntity.parseDate(updateLog.getDate()).isBefore(currentDate)) {
-            return true;
-        }
-        return false;
+        return (null == updateLog || UpdateLogEntity.parseDate(updateLog.getDate()).isBefore(currentDate));
     }
 
     /**
