@@ -1,5 +1,6 @@
 package tech.nikolaev.fias.loader;
 
+import com.linuxense.javadbf.DBFException;
 import com.linuxense.javadbf.DBFReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,8 +73,6 @@ public class PostCodeService extends DataLoader {
         logger.debug("custom region codes: {}" , customRegionCodes);
     }
 
-
-
     protected void processPostcodesFile(String postCodesFilePath, Map<String, String> regionNamesFilter) throws FiasException {
         try (InputStream dbfis = new FileInputStream(postCodesFilePath)) {
             DBFReader dbfReader = new DBFReader(dbfis);
@@ -81,30 +80,24 @@ public class PostCodeService extends DataLoader {
             if (null != dbfCharset) {
                 dbfReader.setCharactersetName(dbfCharset);
             }
-            Map<String, Integer> fields = new HashMap<>();
-            for (int i = 0; i < dbfReader.getFieldCount(); i++) {
-                fields.put(dbfReader.getField(i).getName(), i);
-            }
+            Map<String, Integer> fields = getPostcodesFieldsMap(dbfReader);
             Object[] rec = dbfReader.nextRecord();
             Map<String, AddressEntityAction> objects = new HashMap<>();
             while (null != rec) {
-                String regionName = ((String)rec[fields.get("REGION")]).trim().toLowerCase();
-                if (regionName.length() > 0) {
-                    regionName = regionName.split(" ")[0];
-                    String regionCode = regionNamesFilter.get(regionName);
-                    if (null == regionCode) {
-                        unknownRegs.add(((String)rec[fields.get("REGION")]).trim());
-                    } else {
-                        if (regionFilterService.checkRegion(regionCode)) {
-                            PostCodeEntity postcode = new PostCodeEntity((String) rec[fields.get("INDEX")], regionCode, ((String) rec[fields.get("OPSNAME")]).trim());
-                            objects.put(postcode.getId(), new AddressEntityAction(AddressEntityAction.Action.INDEX, postcode));
-                            regionFilterService.addToPostcodesFilter(postcode.getCode());
-                        }
+                String regionName = ((String)rec[fields.get("REGION")]).trim().toLowerCase().split(" ")[0];
+                String regionCode = regionNamesFilter.get(regionName);
+                if (null == regionCode) {
+                    unknownRegs.add(((String)rec[fields.get("REGION")]).trim());
+                } else {
+                    if (regionFilterService.checkRegion(regionCode)) {
+                        PostCodeEntity postcode = new PostCodeEntity((String) rec[fields.get("INDEX")], regionCode, ((String) rec[fields.get("OPSNAME")]).trim());
+                        objects.put(postcode.getId(), new AddressEntityAction(AddressEntityAction.Action.INDEX, postcode));
+                        regionFilterService.addToPostcodesFilter(postcode.getCode());
                     }
-                    if (objects.size() == getBulkSize()) {
-                        updateDB(objects, PostCodeEntity.TYPE);
-                        objects.clear();
-                    }
+                }
+                if (objects.size() == getBulkSize()) {
+                    updateDB(objects, PostCodeEntity.TYPE);
+                    objects.clear();
                 }
                 rec = dbfReader.nextRecord();
             }
@@ -118,6 +111,14 @@ public class PostCodeService extends DataLoader {
             throw new DBException(dbf);
         }
 
+    }
+
+    private Map<String, Integer> getPostcodesFieldsMap(DBFReader dbfReader) throws DBFException {
+        Map<String, Integer> fields = new HashMap<>();
+        for (int i = 0; i < dbfReader.getFieldCount(); i++) {
+            fields.put(dbfReader.getField(i).getName(), i);
+        }
+        return fields;
     }
 
     public void loadPostcodes() throws FiasException {
