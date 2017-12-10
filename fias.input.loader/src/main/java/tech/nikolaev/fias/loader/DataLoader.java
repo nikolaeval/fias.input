@@ -81,7 +81,7 @@ public abstract class DataLoader {
             }
             time = System.currentTimeMillis() - time;
             logger.info("processed {} recs in {}ms {} rec in sec ", n, time, (n * 1000L / time));
-            logger.info("stored {} recs ", c);
+            logger.info("updated {} recs ", c);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             FileUtils.close(is);
