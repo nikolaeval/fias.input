@@ -1,6 +1,8 @@
 package tech.nikolaev.fias.model;
 
 import javax.xml.stream.XMLStreamReader;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by andrey.l.nikolaev@mail.ru on 12.09.2017.
@@ -25,6 +27,7 @@ public class HouseEntity implements AddressEntity {
     private String buildNum;
     private String structNum;
     private String name;
+    private Set<String> numbers;
 
     public HouseEntity(String guid, String parentGuid, String postalCode, String num, String buildNum, String structNum) {
         this.guid = guid;
@@ -33,6 +36,11 @@ public class HouseEntity implements AddressEntity {
         this.num = num;
         this.buildNum = buildNum;
         this.structNum = structNum;
+        this.numbers = new HashSet<>();
+        numbers.add(num);
+        numbers.add(buildNum);
+        numbers.add(structNum);
+        numbers.remove(null);
     }
 
     public static HouseEntity createFromStream(XMLStreamReader r) {

@@ -56,7 +56,7 @@ public class HouseService extends DataLoader {
         return null;
     }
 
-    protected String buildName(HouseEntity house,String estStatus, String structStatus) throws DBException {
+    protected String buildName(HouseEntity house, String estStatus, String structStatus) throws DBException {
         StringBuilder builder = new StringBuilder(32);
         if (!"0".equals(estStatus)) {
             builder.append(estStatusService.getEstStatuses().get(estStatus).getName()).append(" ").append(house.getNum());

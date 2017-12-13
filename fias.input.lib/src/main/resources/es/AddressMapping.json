@@ -39,6 +39,13 @@
     "words": {
       "type": "text",
       "analyzer": "ru_analyzer"
+    },
+    "houses": {
+      "type": "text"
+    },
+    "numbers": {
+      "type": "text"
     }
+
   }
 }
